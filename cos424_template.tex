@@ -122,7 +122,7 @@ Unlike many other machine learning method, quantifying generalization error or t
 \end{figure}
 
 
-\section{Results}
+\section{Results Using the Baseline, Linear Models and Random Forest}
 
 \subsection{Empirical Measurements}
 In this section, we report several popular empirical measurements that have been used in literature. Figure~\ref{empirical_measurements} shows the logarithm of distance-corrected $P_d$ ($P_d * r^2$, where r is the distance from the earthquake hypocenter to the station), $\tau_c$ and $\tau_p^{max}$. 
@@ -139,7 +139,7 @@ We observe that there appears to be a quasi-linear relation between $P_d * r^2$ 
 We also observe a quasi-linear trend for $\tau_c$ and $\tau_p^{max}$ for earthquakes larger than M4. However, the significant scatter for the smaller earthquake excludes the possibility of achieving good predicting performance using a simple linear fit. This is consistent with findings in previous studies~\cite{Wurman2007}. Hence, in the following sections, we use only the linear fit for $P_d * r^2$-magnitude as the baseline.  
 
 
-\subsection{Training Machine Learning Models}
+\subsection{Linear Models and Random Forest}
 \subsubsection{Feature Engineering}
 To train machine learning models, we wish to incorporate features other than few popular empirical measurements (Figure~\ref{empirical_measurements}). Here only broadband velocity seismograms are used. The velocity records are then integrated to displacement and differentiated to acceleration. We also make velocity envelopes. Each of these four types of records has three components (east, north, and vertical). For each component, we use 0.5, 1, 1.5, ... to 3-second time windows since the arrival time picked by the STA/LTA algorithm Figure~\ref{sta_lta}. For each time window, we compute the maximum, the relative time within a window for the maximum, mean, variance, skewness, kurtosis, percentile (0.25, 0.5, 0.75), and norm (L1, L2, L4), $\tau_c$ and $\tau_p^{max}$. The distance from the earthquake hypocenter to the station ($r$) is also included. We have in total 1663 features. We note there may be many redundant features, especially for amplitude information. It is possible that the performance could be improved if we incorporate more frequency-related features. But currently we use only $\tau_c$ and $\tau_p^{max}$. For random forest, the amplitude-related features are corrected by the earthquake-station distance. Most of these features are transformed into the logarithmic scale. Exceptions include skewness and kurtosis. 
 \subsubsection{Prediction Performance}
