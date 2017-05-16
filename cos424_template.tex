@@ -52,7 +52,7 @@ Here we focus on the southern California regions, where abundant seismicity and 
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
-	\includegraphics*[scale=0.55, viewport= -0mm 40mm 500mm 230mm, angle=0]{./stations_events.pdf}
+	\includegraphics*[scale=0.55, viewport= -0mm 40mm 500mm 230mm, angle=0]{./figure/stations_events.pdf}
 	\caption{{\bf Stations (red triangles) and earthquakes (blue dots) distribution since 1990 in the study region.} For clarity, only events with magnitude larger than 3.0 are plotted.}
 	\label{stations_events} %\label{figt}
 \end{figure}
@@ -60,7 +60,7 @@ Here we focus on the southern California regions, where abundant seismicity and 
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
-	\includegraphics*[scale=0.85, viewport= -5mm 0mm 500mm 100mm, angle=0]{./sta_lta.pdf}
+	\includegraphics*[scale=0.85, viewport= -5mm 0mm 500mm 100mm, angle=0]{./figure/sta_lta}
 	\caption{{\bf P wave arrival during a M4.17 earthquake picked by a recursive STA/LTA method.} (Upper) Seismogram at the station VTV (vertical component). A highpass filter ($>$ 1 Hz) is applied. The red line shows the P wave arrival. (Lower) Characteristic function of the recursive STA/LTA. The red dashed line shows the trigger threshold.}\label{sta_lta} %\label{figt}
 \end{figure}
 
@@ -116,7 +116,7 @@ Unlike many other machine learning method, quantifying generalization error or t
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
-	\includegraphics*[scale=0.35, viewport= -90mm 0mm 500mm 190mm, angle=0]{./Random_forest_prediction.png}
+	\includegraphics*[scale=0.35, viewport= -90mm 0mm 500mm 190mm, angle=0]{./figure/Random_forest_prediction.png}
 	\caption{{\bf A schematic illustration for the prediction process for a random forest regressor.}}\label{RF} 
 \end{figure}
 
@@ -131,7 +131,7 @@ We observe that there appears to be a quasi-linear relation between $P_d * r^2$ 
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
-	\includegraphics*[scale=0.35, viewport= 40mm 0mm 500mm 150mm, angle=0]{./empirical_measurements.png}
+	\includegraphics*[scale=0.35, viewport= 40mm 0mm 500mm 150mm, angle=0]{./figure/empirical_measurements.png}
 	\caption{{\bf Three empirical measurements ($P_d * r^2$, $\tau_c$, and $\tau_p^{max}$) as a function of magnitudes.}}\label{empirical_measurements} 
 \end{figure}
 
@@ -168,7 +168,7 @@ The evaluation metrics for the regressors are shown in Table~\ref{tab1}. All the
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
-	\includegraphics*[scale=0.25, viewport= 35mm 40mm 500mm 500mm, angle=0]{./prediction_vs_true.png}
+	\includegraphics*[scale=0.25, viewport= 35mm 40mm 500mm 500mm, angle=0]{./figure/prediction_vs_true.png}
 	\caption{{\bf Predictions by the baseline model, lasso regression, and random forest.} The three rows show the train set, the test set, and the test error respectively. The dashed lines show zero error.}\label{prediction_vs_true} 
 \end{figure}
 
@@ -177,7 +177,7 @@ Figure~\ref{prediction_vs_true} shows the predicted magnitudes and error compare
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
-	\includegraphics*[scale=0.5, viewport= 10mm 0mm 500mm 120mm, angle=0]{./Feature_importance_lasso_RF.pdf}
+	\includegraphics*[scale=0.5, viewport= 10mm 0mm 500mm 120mm, angle=0]{./figure/Feature_importance_lasso_RF.pdf}
 	\caption{{\bf Top 20 most important features for lasso regression and random forest.} In random forest the importance of distance is the former, although it is also kept as a feature.}\label{Feature_importance_lasso_RF} 
 \end{figure}
 
