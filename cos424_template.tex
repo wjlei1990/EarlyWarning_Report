@@ -53,7 +53,7 @@ Here we focus on the southern California regions, where abundant seismicity and 
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
-	\includegraphics*[scale=0.55, viewport= -0mm 40mm 500mm 230mm, angle=0]{./figure/stations_events.pdf}
+	\includegraphics*[scale=0.4, viewport= -40mm 40mm 500mm 230mm, angle=0]{./figure/stations_events.pdf}
 	\caption{{\bf Stations (red triangles) and earthquakes (blue dots) distribution since 1990 in the study region.} For clarity, only events with magnitude larger than 3.0 are plotted.}
 	\label{stations_events} %\label{figt}
 \end{figure}
@@ -61,7 +61,7 @@ Here we focus on the southern California regions, where abundant seismicity and 
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
-	\includegraphics*[scale=0.85, viewport= -5mm 0mm 500mm 100mm, angle=0]{./figure/sta_lta.pdf}
+	\includegraphics*[scale=0.5, viewport= -55mm 0mm 500mm 100mm, angle=0]{./figure/sta_lta.pdf}
 	\caption{{\bf P wave arrival during a M4.17 earthquake picked by a recursive STA/LTA method.} (Upper) Seismogram at the station VTV (vertical component). A highpass filter ($>$ 1 Hz) is applied. The red line shows the P wave arrival. (Lower) Characteristic function of the recursive STA/LTA. The red dashed line shows the trigger threshold.}\label{sta_lta} %\label{figt}
 \end{figure}
 
@@ -115,12 +115,12 @@ Unlike many other machine learning method, quantifying generalization error or t
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
-	\includegraphics*[scale=0.35, viewport= -90mm 0mm 500mm 190mm, angle=0]{./figure/Random_forest_prediction.png}
+	\includegraphics*[scale=0.25, viewport= -170mm 0mm 500mm 190mm, angle=0]{./figure/Random_forest_prediction.png}
 	\caption{{\bf A schematic illustration for the prediction process for a random forest regressor.}}\label{RF} 
 \end{figure}
 
 
-\section{Results}
+\section{Results using the Baseline, Linear models and Random Forest}
 
 \subsection{Empirical Measurements}
 In this section, we report several popular empirical measurements that have been used in literature. Figure~\ref{empirical_measurements} shows the logarithm of distance-corrected $P_d$ ($P_d * r^2$, where r is the distance from the earthquake hypocenter to the station), $\tau_c$ and $\tau_p^{max}$. 
