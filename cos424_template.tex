@@ -3,6 +3,7 @@
 \usepackage{url}
 \usepackage{graphicx}
 \usepackage{hyperref}
+\usepackage{subcaption}
 
 \title{Final Project Report \\Building An Earthquake Early Warning System}
 
@@ -60,7 +61,7 @@ Here we focus on the southern California regions, where abundant seismicity and 
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
-	\includegraphics*[scale=0.85, viewport= -5mm 0mm 500mm 100mm, angle=0]{./figure/sta_lta}
+	\includegraphics*[scale=0.85, viewport= -5mm 0mm 500mm 100mm, angle=0]{./figure/sta_lta.pdf}
 	\caption{{\bf P wave arrival during a M4.17 earthquake picked by a recursive STA/LTA method.} (Upper) Seismogram at the station VTV (vertical component). A highpass filter ($>$ 1 Hz) is applied. The red line shows the P wave arrival. (Lower) Characteristic function of the recursive STA/LTA. The red dashed line shows the trigger threshold.}\label{sta_lta} %\label{figt}
 \end{figure}
 
@@ -131,14 +132,14 @@ We observe that there appears to be a quasi-linear relation between $P_d * r^2$ 
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
-	\includegraphics*[scale=0.35, viewport= 40mm 0mm 500mm 150mm, angle=0]{./figure/empirical_measurements.png}
+	\includegraphics*[scale=0.33, viewport= 40mm 0mm 500mm 120mm, angle=0]{./figure/empirical_measurements.png}
 	\caption{{\bf Three empirical measurements ($P_d * r^2$, $\tau_c$, and $\tau_p^{max}$) as a function of magnitudes.}}\label{empirical_measurements} 
 \end{figure}
 
 We also observe a quasi-linear trend for $\tau_c$ and $\tau_p^{max}$ for earthquakes larger than M4. However, the significant scatter for the smaller earthquake excludes the possibility of achieving good predicting performance using a simple linear fit. This is consistent with findings in previous studies~\cite{Wurman2007}. Hence, in the following sections, we use only the linear fit for $P_d * r^2$-magnitude as the baseline.  
 
 
-\subsection{Linear Models and Random Forest}
+\subsection{Training Machine Learning Models}
 \subsubsection{Feature Engineering}
 To train machine learning models, we wish to incorporate features other than few popular empirical measurements (Figure~\ref{empirical_measurements}). Here only broadband velocity seismograms are used. The velocity records are then integrated to displacement and differentiated to acceleration. We also make velocity envelopes. Each of these four types of records has three components (east, north, and vertical). For each component, we use 0.5, 1, 1.5, ... to 3-second time windows since the arrival time picked by the STA/LTA algorithm Figure~\ref{sta_lta}. For each time window, we compute the maximum, the relative time within a window for the maximum, mean, variance, skewness, kurtosis, percentile (0.25, 0.5, 0.75), and norm (L1, L2, L4), $\tau_c$ and $\tau_p^{max}$. The distance from the earthquake hypocenter to the station ($r$) is also included. We have in total 1663 features. We note there may be many redundant features, especially for amplitude information. It is possible that the performance could be improved if we incorporate more frequency-related features. But currently we use only $\tau_c$ and $\tau_p^{max}$. For random forest, the amplitude-related features are corrected by the earthquake-station distance. Most of these features are transformed into the logarithmic scale. Exceptions include skewness and kurtosis. 
 \subsubsection{Prediction Performance}
@@ -154,7 +155,7 @@ The evaluation metrics for the regressors are shown in Table~\ref{tab1}. All the
 %		&  \multicolumn{4}{c}{No feature selection} &
 %		\multicolumn{4}{c|}{Feature selection}  \\
 		\cline{2-4}
-		Regressor & MSE & MSE ($<$ M4.5) & MSE ($\geq$ M4.5) & Error Mean ($\geq$ M4.5) & Non-zero features\\ \hline \hline
+		Regressor & MSE & MSE ($<$ M4.5) & MSE ($\geq$ M4.5) & Mean error ($\geq$ M4.5) & Non-zero features\\ \hline \hline
 		Baseline & 0.0899 & 0.0695 & 0.2620 & -0.4250  & 1 \\
 		RF & 0.0451 & 0.0388 & 0.0981 & -0.1536 & 1663 \\ 
 		Lasso &  0.0565 & 0.0477 & 0.1309 & -0.2470 & 347 \\ 
@@ -165,24 +166,31 @@ The evaluation metrics for the regressors are shown in Table~\ref{tab1}. All the
 	\label{tab1}
 \end{table}
 
-\begin{figure}[ht!]
-	% Requires \usepackage{graphicx}
-	\centering
-	\includegraphics*[scale=0.25, viewport= 35mm 40mm 500mm 500mm, angle=0]{./figure/prediction_vs_true.png}
-	\caption{{\bf Predictions by the baseline model, lasso regression, and random forest.} The three rows show the train set, the test set, and the test error respectively. The dashed lines show zero error.}\label{prediction_vs_true} 
-\end{figure}
-
 Figure~\ref{prediction_vs_true} shows the predicted magnitudes and error compared to the true magnitudes. As mentioned in Section 5.1, the baseline model systematically underestimates the magnitudes of large earthquakes. For lasso and random forest models, this effect is less severe. However, it seems that even using the latter two models, we still underestimate the magnitudes of the large earthquakes ($geq$ M4.5), as shown by the mean error (Table~\ref{tab1}). The MSE for the small earthquakes is several times less than that of the large earthquakes. At least one of the reasons is that the number of samples within this magnitude range is too small. Another reason could be that there are not many features which are not sensitive to the finite fault effect for large earthquakes, such as reliable frequency-related features.      
 
+
+
+
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
-	\includegraphics*[scale=0.5, viewport= 10mm 0mm 500mm 120mm, angle=0]{./figure/Feature_importance_lasso_RF.pdf}
-	\caption{{\bf Top 20 most important features for lasso regression and random forest.} In random forest the importance of distance is the former, although it is also kept as a feature.}\label{Feature_importance_lasso_RF} 
+	\includegraphics*[scale=0.18, viewport= 85mm 40mm 800mm 460mm, angle=0]{./figure/prediction_vs_true.png}
+	\caption{{\bf Predictions by the baseline model, linear models (lasso, ridge, elastic net), and random forest.} The three rows show the train set, the test set, and the test error respectively. The dashed lines show zero error.}\label{prediction_vs_true} 
 \end{figure}
+
+
+
 
 \subsubsection{Important features}
 Figure~\ref{Feature_importance_lasso_RF} shows the most important features for lasso and random forest. It is expected that distance would be very important for lasso but not for random forest because the amplitude-related features for the former are not corrected for geometrical spreading (distance). It seems that all but one for random forest are derived from the vertical component of the displacement time series (labeled as BHZ.disp), while features for lasso show a greater variety. This seems consistent with that the signal-to-noise ratio for P wave is generally higher for the vertical component, but there could be some non-linearity that may not be fully explained by a linear model such as lasso. In addition, frequency-related features are more important for lasso (e.g. $\tau_c$).  
+
+\begin{figure}[ht!]
+	% Requires \usepackage{graphicx}
+	\centering
+	\includegraphics*[scale=0.5, viewport= 12mm 0mm 500mm 120mm, angle=0]{./figure/Feature_importance_lasso_RF.pdf}
+	\caption{{\bf Top 20 most important features for lasso regression and random forest.} In the random forest model, distance has been corrected for, although it is also kept as a feature. Therefore, the importance of distance is expected to be not as high as in lasso.}\label{Feature_importance_lasso_RF} 
+\end{figure}
+
 
 \section{Neural Networks and LSTM}
 Neural networks are famous for its function of "automatic feature extraction". So for the input layer, instead of using empirical features, we tried used several "raw" measurements, including the time series of displacement, velocity, acceleration and cumulative acceleration of the ground motion. As we have mentioned in the linear models, we cropped 3 seconds window starting from the onset, which give us total 60 data points, given the sampling rate of instrument is 20Hz on one component. Since in total we have three components data, plus the distance information, the input layer size is $3*60 + 1 = 181$. 
@@ -235,23 +243,41 @@ We also tried LSTM here since our input feature is basically time series. Howeve
 		\cline{2-6}
 		Input features & MSE & MSE($<$M4.5) & Mean Error($<$M4.5)& MSE($\geq$M4.5) & Mean Error($\geq$M4.5)\\ 
 		\cline{2-6} \hline \hline
-		displacement & \textbf{\underline{0. 088}} & 0.1476 & \textbf{0.1130} & 0.1046  & 0.1092 \\
-		 velocity & 0.104  & \textbf{0.0872} & 0.0915 & 0.0978 & 0.0899 \\ 
-		acceleration &  0.102 & 0.0950 & 0.1479 & \textbf{0.0861} & 0.11 \\ 
-		 cumul acc & 0.099 & 0.0865 & 0.0947 & \textbf{\underline{0.0862}}  & 0.0990 \\ 
+		displacement & \textbf{\underline{0. 0861}} & \textbf{0.0839} & 0.0739 & \textbf{0.1920}  & \textbf{-0.2258} \\
+		 velocity & 0.1040  &  0.0981 & 0.1204 & 0.2566 & -0.3206\\ 
+		acceleration &  0.1022 & 0.0963 & 0.1056 & 0.2500 & -0.3061 \\ 
+		 cumul acc & 0.0991 & 0.0915 & \textbf{0.0434} & 0.2876  & -0.2979 \\ 
+		 LSTM & 0.1410 & 0.1162 & 0.0981 & 0.7011 & -0.7329 \\
 		 \hline
 	\end{tabular}
 	\caption{{\bf The MSE values of Neural networks using different input features.} The best performance is given by the model (hidden\_layers=5, neurons=180), which is underlined in the table.}
 	\label{tab:nn_perf}
 \end{table}
 
-From table\ref{tab:nn_perf}, we can see that the overall performance of Neural networks beats the baseline model but still not as good as linear models or random forest.
+From table\ref{tab:nn_perf}, we can see that the overall performance of Neural networks beats the baseline model but still not as good as linear models or random forest. What is more, the under-estimation of large events, which is measured by the mean error in the table, is also reduced compared to linear models, though the difference is not significant. The LSTM model doesn't achieve very good results in our current settings. Originally, we thought LSTM is the best method when dealing with time series data. However, due to special settings of our problem, that we need to incorporate distance information, it turns out it needs more tunnings in the future.
 
+In summary, the Neural network beats the baseline model and out-performs linear model in some aspects but it is still not good as Random Forest.  The LSTM needs more work in the future.
 
-
+\begin{figure}[ht!]
+\centering
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width = \textwidth]{./figure/nn_loss}
+\caption{variance explained by singular values}
+\label{fig:svd_left}
+\end{subfigure}
+\begin{subfigure}{0.48\textwidth}
+\centering
+\includegraphics[width = \textwidth]{./figure/nn_prediction}
+\caption{The voilin plot of probabilities}
+\label{fig:svd_right}
+\end{subfigure}
+\caption{Training and prediction results from SVD. The figure on the left shows the proportion of variances explained by singular values in descending order. The figure on the right shows the probability of future transaction between addresses in the test data.}
+\label{fig:combined}
+\end{figure}
 
 \section{Discussions and Conclusions}
-Blabla
+
 %\section{Scientific Questions}
 %Although the primary goal of this proposal is to reduce the error in fast, real-time report of earthquake magnitudes, we hope that the results could also shed light on several important scientific questions that are yet to be resolved in seismology. These include: (1) Is there enough information in the first a few seconds of the seismograms to predict the final magnitude of an earthquake? If yes, what is it? The answer to this would be very important for decreasing the size of ``blind zone" during an earthquake (the region that the strong shaking arrives before the warning is issued); (2) Is there self-similarity across earthquakes with a wide range of magnitudes? Small earthquakes (less than M5) occur much more frequently than large earthquakes; the former dominates our dataset. Can we use small earthquakes to infer the properties of large earthquakes? (3) Is it possible to reduce the number of false positives in our system, which trigger alarm without real earthquake happening and cause unnecessary panic? To address these questions would have not only substantial societal impact, but also significant implications for understanding earthquake dynamics.    
 
@@ -259,7 +285,6 @@ Blabla
 %\subsubsection*{Acknowledgments}
 
 \newpage
-
 \bibliography{ref}
 \bibliographystyle{plain}
 
