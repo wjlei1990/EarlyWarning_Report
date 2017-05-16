@@ -26,7 +26,7 @@ Department of Geosciences \\
 \maketitle
 
 \begin{abstract}
-Large earthquakes can cause an immense amount of casualties and damages. To mitigate hazard in seismically active regions, we build an prototype earthquake early warning (EEW) system using machine learning approaches. We focus on southern California, and use the ground motion data from thousands of earthquakes recorded by hundreds of seismic stations. The goal is to issue fast and reliable reports of earthquake magnitudes to regions susceptible to strong ground shaking before it arrives. We test several different models including lasso regression, ridge regression, Elastic net, random forest and neural network. We show that after feature engineering, these models greatly outperform those using a few empirical measurements employed by currently operating EEW systems. We find that random forest slightly outperforms linear models. However, these models generally underestimate the magnitude of the largest earthquakes ($>$ M6). Possible reasons for this are discussed. Neural network...       
+Large earthquakes can cause an immense amount of casualties and damages. To mitigate hazard in seismically active regions, we build an prototype earthquake early warning (EEW) system using machine learning approaches. We focus on southern California, and use the ground motion data from thousands of earthquakes recorded by hundreds of seismic stations. The goal is to issue fast and reliable reports of earthquake magnitudes to regions susceptible to strong ground shaking before it arrives. We test several different models including lasso regression, ridge regression, Elastic net, random forest and neural network. We show that after feature engineering, these models greatly outperform those using a few empirical measurements employed by currently operating EEW systems. We find that random forest slightly outperforms linear models. However, these models generally underestimate the magnitude of the largest earthquakes ($>$ M6). Possible reasons for this are discussed. Neural network shows its potential as a powerful model in this task, by beating the baseline line model and stay tight with linear models in some aspects, though there is more fine tuning could be done in the future work.
 
 \end{abstract}
 
@@ -53,7 +53,7 @@ Here we focus on the southern California regions, where abundant seismicity and 
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
-	\includegraphics*[scale=0.45, viewport= -20mm 40mm 500mm 230mm, angle=0]{./figure/stations_events.pdf}
+	\includegraphics*[scale=0.55, viewport= -0mm 40mm 500mm 230mm, angle=0]{./figure/stations_events.pdf}
 	\caption{{\bf Stations (red triangles) and earthquakes (blue dots) distribution since 1990 in the study region.} For clarity, only events with magnitude larger than 3.0 are plotted.}
 	\label{stations_events} %\label{figt}
 \end{figure}
@@ -61,7 +61,7 @@ Here we focus on the southern California regions, where abundant seismicity and 
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
-	\includegraphics*[scale=0.75, viewport= -15mm 0mm 500mm 100mm, angle=0]{./figure/sta_lta.pdf}
+	\includegraphics*[scale=0.85, viewport= -5mm 0mm 500mm 100mm, angle=0]{./figure/sta_lta.pdf}
 	\caption{{\bf P wave arrival during a M4.17 earthquake picked by a recursive STA/LTA method.} (Upper) Seismogram at the station VTV (vertical component). A highpass filter ($>$ 1 Hz) is applied. The red line shows the P wave arrival. (Lower) Characteristic function of the recursive STA/LTA. The red dashed line shows the trigger threshold.}\label{sta_lta} %\label{figt}
 \end{figure}
 
@@ -71,9 +71,7 @@ Data processing consists of the following steps:
 \item Pick the P wave arrival using a standard STA/LTA algorithm~\cite{Withers1998}, which has been widely used in seismology. An example is shown in Figure~\ref{sta_lta}. 
 \item Remove instrument gain such that the seismogram amplitude is within the correct range.
 \item Integrate or differentiate the data as appropriate to obtain displacement, velocity and acceleration seismograms for each station.
-\item Derive features from the seismograms for training linear and random forest models. Details of these features are discussed in Section 5.2.   
-
-\item Neural network...
+\item Derive features from the seismograms for training linear and random forest models. Details of these features are discussed in Section 5.2.  In the neural netwoks, we directly use the time series of gound motion as the input feature, with no extra feature extraction procedures.
 
 \item The data are divided into a training set and a test set. We find that earthquakes with magnitude larger than 4.5 constitute only 3\% of the total data volume. Since we are particularly interested in testing the predicting power on larger earthquakes, we keep in the test set 30\% of the data with magnitude $\geq$ 4.5, and 10\% of those with magnitude $<$ 4.5.
 
@@ -184,12 +182,7 @@ Figure~\ref{prediction_vs_true} shows the predicted magnitudes and error compare
 \subsubsection{Important features}
 Figure~\ref{Feature_importance_lasso_RF} shows the most important features for lasso and random forest. It is expected that distance would be very important for lasso but not for random forest because the amplitude-related features for the former are not corrected for geometrical spreading (distance). It seems that all but one for random forest are derived from the vertical component of the displacement time series (labeled as BHZ.disp), while features for lasso show a greater variety. This seems consistent with that the signal-to-noise ratio for P wave is generally higher for the vertical component, but there could be some non-linearity that may not be fully explained by a linear model such as lasso. In addition, frequency-related features are more important for lasso (e.g. $\tau_c$).  
 
-\begin{figure}[ht!]
-	% Requires \usepackage{graphicx}
-	\centering
-	\includegraphics*[scale=0.5, viewport= 12mm 0mm 500mm 120mm, angle=0]{./figure/Feature_importance_lasso_RF.pdf}
-	\caption{{\bf Top 20 most important features for lasso regression and random forest.} In the random forest model, distance has been corrected for, although it is also kept as a feature. Therefore, the importance of distance is expected to be not as high as in lasso.}\label{Feature_importance_lasso_RF} 
-\end{figure}
+
 
 
 \section{Neural Networks and LSTM}
@@ -221,7 +214,7 @@ For the choice of activation function, we tried using ReLU and Tanh. It turns ou
 		 hidden layer = 5 & 0.0883 & 0.1128 & 0.0865 & 0.0947 & \textbf{\underline{0.0862}}  & 0.0990\\ 
 		 hidden layer = 10 & 0.0944 & 0.0948 & 0.0935 & 0.0912 & \textbf{0.0878} & 0.2084  \\ \hline
 	\end{tabular}
-	\caption{{\bf MSE values on the validation data using different number of hidden layers and neurons in each hidden layer, using 25 epoch for training.} The best performance is given by the model (hidden\_layers=5, neurons=180), which is underlined in the table.}
+	\caption{{\bf The MSE values on the validation data using different number of hidden layers and neurons in each hidden layer, after 25 epoch of training.} The best performance is given by the model (hidden\_layers=5, neurons=180), which is underlined in the table.}
 	\label{tab:nn_cv}
 \end{table}
 
@@ -278,13 +271,26 @@ In summary, the Neural network beats the baseline model and out-performs linear 
 
 \section{Discussions and Conclusions}
 
+In this work, we implemented various methods to predict the magnitude of earthquakes using the very early arrivals of ground motion. Starting from a single-factor model as the baseline, we tried linear models, random forest, all the way to neural networks and LSTM. Among the models, most of them beat the baseline model and random forest stand out as the best one, reducing the MSE from 0.090 to 0.045 comparing with the baseline model. Another question we want to address is to find if there is self-similarity across earthquakes with a wide range of magnitudes. The answer, from our results, is probably NO. The MSE values and mean errors of large earthquakes($\geq $ M4.5) is significantly larger than smaller ones($< $ M4.5), which means it is not straight extropolation from smalle to large events.
+
+Our future works will primarily be focused on the Neural network and LSTM. As shown in the previous sections, the Neural netwoks beats the baseline model but still worse than random forest. We will try to put more features in the input layers and have more tunning in the future work. On the other hand, we did not succeed using LSTM even though the method is proven to be very powerful in time series related problems. Due to the special physical background in our problem, distance plays a vital role in predicting the earthquake magnitude but we are not sure how to assimilate the feature into LSTM. Our future would be more experiment and research, designing a special LSTM that takes in non-temporal features.
+
 %\section{Scientific Questions}
 %Although the primary goal of this proposal is to reduce the error in fast, real-time report of earthquake magnitudes, we hope that the results could also shed light on several important scientific questions that are yet to be resolved in seismology. These include: (1) Is there enough information in the first a few seconds of the seismograms to predict the final magnitude of an earthquake? If yes, what is it? The answer to this would be very important for decreasing the size of ``blind zone" during an earthquake (the region that the strong shaking arrives before the warning is issued); (2) Is there self-similarity across earthquakes with a wide range of magnitudes? Small earthquakes (less than M5) occur much more frequently than large earthquakes; the former dominates our dataset. Can we use small earthquakes to infer the properties of large earthquakes? (3) Is it possible to reduce the number of false positives in our system, which trigger alarm without real earthquake happening and cause unnecessary panic? To address these questions would have not only substantial societal impact, but also significant implications for understanding earthquake dynamics.    
-
 
 %\subsubsection*{Acknowledgments}
 
 \newpage
+\appendix
+
+\section{Feature Importance from Lasso and Random Forest}
+\begin{figure}[ht!]
+	% Requires \usepackage{graphicx}
+	\centering
+	\includegraphics*[scale=0.5, viewport= 12mm 0mm 500mm 120mm, angle=0]{./figure/Feature_importance_lasso_RF.pdf}
+	\caption{{\bf Top 20 most important features for lasso regression and random forest.} In the random forest model, distance has been corrected for, although it is also kept as a feature. Therefore, the importance of distance is expected to be not as high as in lasso.}\label{Feature_importance_lasso_RF} 
+\end{figure}
+
 \bibliography{ref}
 \bibliographystyle{plain}
 
