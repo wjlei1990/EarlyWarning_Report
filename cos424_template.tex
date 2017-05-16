@@ -157,7 +157,7 @@ The evaluation metrics for the regressors are shown in Table~\ref{tab1}. All the
 		\cline{2-4}
 		Regressor & MSE & MSE ($<$ M4.5) & MSE ($\geq$ M4.5) & Mean error ($\geq$ M4.5) & Non-zero features\\ \hline \hline
 		Baseline & 0.0899 & 0.0695 & 0.2620 & -0.4250  & 1 \\
-		RF & 0.0451 & 0.0388 & 0.0981 & -0.1536 & 1663 \\ 
+		RF & \textbf{0.0451} & \textbf{0.0388} & \textbf{0.0981} & \textbf{-0.1536} & 1663 \\ 
 		Lasso &  0.0565 & 0.0477 & 0.1309 & -0.2470 & 347 \\ 
 		Ridge & 0.0560 & 0.0477 & 0.1260 & -0.2421 & 1663 \\ 
 		EN & 0.0565 & 0.0476 & 0.1310 & -0.2470 & 349 \\ \hline
@@ -195,10 +195,10 @@ Figure~\ref{Feature_importance_lasso_RF} shows the most important features for l
 \section{Neural Networks and LSTM}
 Neural networks are famous for its function of "automatic feature extraction". So for the input layer, instead of using empirical features, we tried used several "raw" measurements, including the time series of displacement, velocity, acceleration and cumulative acceleration of the ground motion. As we have mentioned in the linear models, we cropped 3 seconds window starting from the onset, which give us total 60 data points, given the sampling rate of instrument is 20Hz on one component. Since in total we have three components data, plus the distance information, the input layer size is $3*60 + 1 = 181$. 
 
-Again, considering the symmetrical feature of input, i.e., given the sign reverted ground motion, it ends up with same magnitude of earthquakes, we did one more step, using the envelope transition, rather than the raw waveform, as the features of input layer. To avoid over-fitting, we include the $\l2$ regularization and a dropout layer.
+Again, considering the symmetrical nature of input, i.e., given the sign reverted ground motion, it ends up with same magnitude of earthquakes, we did one more step, using the envelope transition, rather than the raw waveform, as the features of input layer. To avoid over-fitting, we include the $\l2$ regularization and a dropout layer.
 
 \subsection{Hyper-parameter tuning using validation dataset}
-The \textbf{hyper-parameter} in Neural networks includes the \textbf{number of hidden layers}, the \textbf{number of neurons in each hidden layers}, the learning rate, weight decay($l2$ regularization coefficient), dropout ratio, the activation function and so on. Due to the high cost of training a neural network, here we only focusd on tunning two parameters, the number of hidden layers and the number of neurons in each hidden layers, which affect the representation capability of neural networks the most. For the layout of neural networks, we keep the number of neurons the same in each hidden layer.
+The \textbf{hyper-parameter} in neural networks includes the \textbf{number of hidden layers}, the \textbf{number of neurons in each hidden layers}, the learning rate, weight decay($l2$ regularization coefficient), dropout ratio, the activation function and so on. Due to the high cost of training a neural network, here we only focusd on tunning two parameters, the number of hidden layers and the number of neurons in each hidden layers, which affect the representation capability of neural networks the most. For the layout of neural networks, we keep the number of neurons the same in each hidden layer.
 
 For the choice of activation function, we tried using ReLU and Tanh. It turns out that the \textbf{ReLU} gives much better performance, from the point view of convergence rate and final loss values. As for other parameters, we set the weight decay to 0.005, the drop ratio to 10\%.
 
@@ -225,7 +225,7 @@ For the choice of activation function, we tried using ReLU and Tanh. It turns ou
 	\label{tab:nn_cv}
 \end{table}
 
-In order to tune the hyper-paramters, we split the train data one step more, keeping 80\% as train data and 20\% as validation data. Table\ref{tab:nn_cv} shows our validation results, using the displacement as the input feature. From the table, we can see that there is really no clear patterns as to set the number of layers and neurons, indicating the complexity and non-linearity of neuron networks. One observation, though, coming from the table, is that setting the number of neurons in each hidden layer to 300, might there is no optimal models coming from that setting. Since our input layer is in dimension of 181, 300 might leads to over-fitting our model.  On the other hand, setting the number of neurons to 10 is might also leads to under-fit.
+In order to tune the hyper-paramters, we split the train data one step more, keeping 80\% as train data and 20\% as validation data. Table\ref{tab:nn_cv} shows our validation results, using the displacement as the input feature. From the table, we can see that there is really no clear patterns as to set the number of layers and neurons, indicating the complexity and non-linearity of neuron networks. One observation is that  the model performance is not optimal when 300 neurons in each hidden layer are used. Since our input layer is in dimension of 181, 300 neurons might lead to over-fitting.  On the other hand, a small number of neurons might leads to under-fit.
 
 \subsection{Long Short-Term Memory(LSTM)}
 We also tried LSTM here since our input feature is basically time series. However, the MSE of validation and test data, stays around 0.180 and won't reduce any more. We got one model, using the acceleration as input time series, reaches the MSE value as 0.140. However, the MSE value is still way beyond our baseline mode. One difficulty we found in LSTM is there a very important feature, distance, very difficulty to incorporate into the LSTM framework since it doesn't have any temporal relationship with the time series. Unlike the task of speech recognition, in which the shape of waveform is important but the absolute amplitude is not, distance will play a vital role in prediction the magnitude since the amplitude of  waveform will decay in exponential order with distance.
@@ -289,3 +289,4 @@ In summary, the Neural network beats the baseline model and out-performs linear 
 \bibliographystyle{plain}
 
 \end{document}
+
