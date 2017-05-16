@@ -26,7 +26,7 @@ Department of Geosciences \\
 \maketitle
 
 \begin{abstract}
-Large earthquakes can cause an immense amount of casualties and damages. To mitigate hazard in seismically active regions, we build an prototype earthquake early warning (EEW) system using machine learning approaches. We focus on southern California, and use the ground motion data from thousands of earthquakes recorded by hundreds of seismic stations. The goal is to issue fast and reliable reports of earthquake magnitudes to regions susceptible to strong ground shaking before it arrives. We test several different models including lasso regression, ridge regression, Elastic net, random forest and neural network. We show that after feature engineering, these models greatly outperform those using a few empirical measurements employed by currently operating EEW systems. We find that random forest slightly outperforms linear models. However, these models generally underestimate the magnitude of the largest earthquakes ($>$ M6). Possible reasons for this are discussed. Neural network shows its potential as a powerful model in this task, by beating the baseline line model and stay tight with linear models in some aspects, though there is more fine tuning could be done in the future work.
+  Large earthquakes can cause an immense amount of casualties and damages. To mitigate hazard in seismically active regions, we build an prototype earthquake early warning (EEW) system using machine learning approaches. We focus on southern California, and use the ground motion data from thousands of earthquakes recorded by hundreds of seismic stations. The goal is to issue fast and reliable reports of earthquake magnitudes to regions susceptible to strong ground shaking before it arrives. We test several different models including \textbf{Lasso regression}, \textbf{Ridge regression}, \textbf{ElasticNet}, \textbf{Random Forest} and \textbf{Neural Network}. We showed that after feature engineering, these models greatly outperform those using a few empirical measurements employed by currently operating EEW systems, while random forest stands out as the best model among all the models. Neural network shows its potential as a powerful tool in this task, by beating the baseline line model and stay tight with linear models in some aspects, though there is more fine tuning could be done in the future work. However, these models generally underestimate the magnitudes of large earthquakes($>$M4.5), indicating that there might be internal difference between small and large earthquakes. More details will be discussed in this paper.
 
 \end{abstract}
 
@@ -38,11 +38,11 @@ electromagnetic waves~\cite{Allen2009, Bose2009}. The alert time can be used to 
 
 There are several active warning systems operating in Mexico, Japan, Taiwan, Turkey and Romania. In addition, implementation and testing of such systems are under development in United states, Europe and Asia~\cite{Allen2009, Strauss2016}. However, currently the adopted methods for EEW generally rely on empirical relations between earthquake magnitudes and several measurements derived from the recorded seismograms. Generally, the standard deviation of the prediction error in magnitude is reported to be around 0.3-0.5 unit (corresponding to a 3-6 times difference in energy release)~\cite{Bose2013}. 
 
-In this work, we propose to explore the possibility of utilizing various machine learning techniques to obtain more reliable estimates of earthquake magnitudes. Results using previous EEW methodswould serve as the baseline.
+In this work, we propose to explore the possibility of utilizing various machine learning techniques to obtain more reliable estimates of earthquake magnitudes. Results using previous EEW methods would serve as the baseline.
 
 
 \section{Related Work}
- The measurements often adopted in currently operating EEW systems include the predominant frequency (${tau_p}^{max}$, $tau_c$)~\cite{Allen2003, Kanamori2005} and the peak amplitude of P waves ($P_d$, $P_v$), the seismic waves that arrive first but cause weak shaking~\cite{Wurman2007}. The latter is usually corrected for the effect of geometric spreading (energy decreasing with distance). The distance-corrected $P_d$ tend to underestimate the magnitude of large earthquakes~\cite{Wurman2007}. Although ${\tau_p}^{max}$ and $\tau_c$ seem not to suffer from this, they are not very robust and often lead to a large false positive rate~\cite{Wurman2007}. These measurements will be shown in the following sections.  
+ The measurements being adopted in currently operating EEW systems include the predominant frequency (${tau_p}^{max}$, $tau_c$)~\cite{Allen2003, Kanamori2005} and the peak amplitude of P waves ($P_d$, $P_v$), the seismic waves that arrive first but cause weak shaking~\cite{Wurman2007}. The latter is usually corrected for the effect of geometric spreading (energy decreasing with distance). The distance-corrected $P_d$ tend to underestimate the magnitude of large earthquakes~\cite{Wurman2007}. Although ${\tau_p}^{max}$ and $\tau_c$ seem not to suffer from this, they are not very robust and often lead to a large false positive rate~\cite{Wurman2007}. These measurements will be shown in the following sections.  
 
 \section{Methodology}
 \subsection{Data Processing}
@@ -58,6 +58,18 @@ Here we focus on the southern California regions, where abundant seismicity and 
 	\label{stations_events} %\label{figt}
 \end{figure}
 
+Data processing consists of the following steps:
+
+\begin{enumerate}
+\item Pick the P wave arrival using a standard STA/LTA algorithm~\cite{Withers1998}, which has been widely used in seismology. An example is shown in Figure~\ref{sta_lta}. 
+\item Remove instrument gain such that the seismogram amplitude is within the correct range.
+\item Integrate or differentiate the data as appropriate to obtain displacement, velocity and acceleration seismograms for each station.
+\item Derive features from the seismograms for training linear and random forest models. Details of these features are discussed in Section 5.2.  In the neural networks, however, the time series of ground motion, such as displacement or velocity, are used directly as the features of input layer, with no extra feature extraction needed.
+
+\item The data are divided into a training set and a test set. We find that earthquakes with magnitude larger than 4.5 constitute only 3\% of the total data volume. Since we are particularly interested in testing the predicting power on larger earthquakes, we keep in the test set 30\% of the data with magnitude $\geq$ 4.5, and 10\% of those with magnitude $<$ 4.5.
+
+\end{enumerate}
+
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
 	\centering
@@ -65,22 +77,11 @@ Here we focus on the southern California regions, where abundant seismicity and 
 	\caption{{\bf P wave arrival during a M4.17 earthquake picked by a recursive STA/LTA method.} (Upper) Seismogram at the station VTV (vertical component). A highpass filter ($>$ 1 Hz) is applied. The red line shows the P wave arrival. (Lower) Characteristic function of the recursive STA/LTA. The red dashed line shows the trigger threshold.}\label{sta_lta} %\label{figt}
 \end{figure}
 
-Data processing consists of the following steps:
-
-\begin{enumerate}
-\item Pick the P wave arrival using a standard STA/LTA algorithm~\cite{Withers1998}, which has been widely used in seismology. An example is shown in Figure~\ref{sta_lta}. 
-\item Remove instrument gain such that the seismogram amplitude is within the correct range.
-\item Integrate or differentiate the data as appropriate to obtain displacement, velocity and acceleration seismograms for each station.
-\item Derive features from the seismograms for training linear and random forest models. Details of these features are discussed in Section 5.2.  In the neural netwoks, we directly use the time series of gound motion as the input feature, with no extra feature extraction procedures.
-
-\item The data are divided into a training set and a test set. We find that earthquakes with magnitude larger than 4.5 constitute only 3\% of the total data volume. Since we are particularly interested in testing the predicting power on larger earthquakes, we keep in the test set 30\% of the data with magnitude $\geq$ 4.5, and 10\% of those with magnitude $<$ 4.5.
-
-\end{enumerate}
 
 
 \subsection{Methods and Evaluation Metrics}
 
-In this project, several different well-established machine learning algorithms will be used. Since this is inherently a regression problem, we use several linear regressors (ridge, lasso, elastic net) and a tree-based method (random forest). To push our project further, we also use neural network in our prediction model. Recurrent Neural Network(RNN) has been successfully used in speech recognition, which is intrinsically similar to our problem in that both utilize the "waveforms" as input information.  We will evaluate the performance of these model with mean squared error. 
+In this project, several well-established machine learning algorithms will be used. Since this is inherently a regression problem, we use several linear regressors (ridge, lasso, elastic net) and a tree-based method (random forest). To push our project further, we also use neural network in our prediction model. Long short-term memory(LSTM) has been successfully used in speech recognition, which is intrinsically similar to our problem in that both utilize the "waveforms" as input information.  We will evaluate the performance of these model with \textbf{mean squared error(MSE)}.
 
 \section{Spotlight Regressor: Random Forest}
 
@@ -125,7 +126,7 @@ Unlike many other machine learning method, quantifying generalization error or t
 \subsection{Empirical Measurements}
 In this section, we report several popular empirical measurements that have been used in literature. Figure~\ref{empirical_measurements} shows the logarithm of distance-corrected $P_d$ ($P_d * r^2$, where r is the distance from the earthquake hypocenter to the station), $\tau_c$ and $\tau_p^{max}$. 
 
-We observe that there appears to be a quasi-linear relation between $P_d * r^2$ and magnitude. We perform a linear fit (dahsed line in Figure~\ref{empirical_measurements}), the magnitudes of large earthquakes (M $>$ 4.5) are in general underestimated. This indicates that the slope decreases with magnitude. ~\cite{Wurman2007} suggested that this might be caused by the fact that the source dimension of large earthquake is finite (not well approximated by a point). Therefore, seismic energy released by large portions of the source area may travel longer than $r$. In addition, the majority of these large earthquakes occurred before 2000, when the station distribution was very sparse. The stations were far from the earthquakes such that attenuation effect of the earth may be significant, which further reduces the seismic signal amplitude.     
+We observe that there appears to be a \textbf{quasi-linear relation} between $P_d * r^2$ and magnitude. We perform a linear fit (dahsed line in Figure~\ref{empirical_measurements}), the magnitudes of large earthquakes (M $>$ 4.5) are in general \textbf{underestimated}. This indicates that the slope decreases with magnitude. ~\cite{Wurman2007} suggested that this might be caused by the fact that the source dimension of large earthquake is finite (not well approximated by a point). Therefore, seismic energy released by large portions of the source area may travel longer than $r$. In addition, the majority of these large earthquakes occurred before 2000, when the station distribution was very sparse. The stations were far from the earthquakes such that attenuation effect of the earth may be significant, which further reduces the seismic signal amplitude.     
 
 \begin{figure}[ht!]
 	% Requires \usepackage{graphicx}
@@ -134,16 +135,18 @@ We observe that there appears to be a quasi-linear relation between $P_d * r^2$ 
 	\caption{{\bf Three empirical measurements ($P_d * r^2$, $\tau_c$, and $\tau_p^{max}$) as a function of magnitudes.}}\label{empirical_measurements} 
 \end{figure}
 
-We also observe a quasi-linear trend for $\tau_c$ and $\tau_p^{max}$ for earthquakes larger than M4. However, the significant scatter for the smaller earthquake excludes the possibility of achieving good predicting performance using a simple linear fit. This is consistent with findings in previous studies~\cite{Wurman2007}. Hence, in the following sections, we use only the linear fit for $P_d * r^2$-magnitude as the baseline.  
+We also observed a quasi-linear trend for $\tau_c$ and $\tau_p^{max}$ for earthquakes larger than M4. However, the significant scatter for the smaller earthquake excludes the possibility of achieving good predicting performance using a simple linear fit. This is consistent with findings in previous studies~\cite{Wurman2007}. Hence, in the following sections, we use only the linear fit for $P_d * r^2$-magnitude as the baseline.  
 
 
 \subsection{Training Machine Learning Models}
-\subsubsection{Feature Engineering}
-To train machine learning models, we wish to incorporate features other than few popular empirical measurements (Figure~\ref{empirical_measurements}). Here only broadband velocity seismograms are used. The velocity records are then integrated to displacement and differentiated to acceleration. We also make velocity envelopes. Each of these four types of records has three components (east, north, and vertical). For each component, we use 0.5, 1, 1.5, ... to 3-second time windows since the arrival time picked by the STA/LTA algorithm Figure~\ref{sta_lta}. For each time window, we compute the maximum, the relative time within a window for the maximum, mean, variance, skewness, kurtosis, percentile (0.25, 0.5, 0.75), and norm (L1, L2, L4), $\tau_c$ and $\tau_p^{max}$. The distance from the earthquake hypocenter to the station ($r$) is also included. We have in total 1663 features. We note there may be many redundant features, especially for amplitude information. It is possible that the performance could be improved if we incorporate more frequency-related features. But currently we use only $\tau_c$ and $\tau_p^{max}$. For random forest, the amplitude-related features are corrected by the earthquake-station distance. Most of these features are transformed into the logarithmic scale. Exceptions include skewness and kurtosis. 
-\subsubsection{Prediction Performance}
-We use 5-fold cross validation to tune the hyperparameters for the linear models (lasso, ridge, elastic net), and out-of-bag scores for random forest. Then the models are used to predict the earthquake magnitudes in the test set.
 
-The evaluation metrics for the regressors are shown in Table~\ref{tab1}. All the machine learning methods outperform the baseline, with random forest being slight better than the linear models. This may suggest a weak non-linear relation between the features and the magnitudes. As expected, the lasso regression and elastic-net regression produce the most sparse models, with only 347 and 349 features with non-zero coefficients (linear models) or importance (random forest).   
+\subsubsection{Feature Engineering}
+To train machine learning models, we wish to incorporate features other than few popular empirical measurements (Figure~\ref{empirical_measurements}). The instrument we used is broad band seismometers recording the velocity of ground motion on 3 components, Vertical, North and South. The velocity records are integrated to displacement and differentiated to acceleration. We also calculate the envelopes of all types of ground motions mentioned above. For each component, we use 0.5, 1, 1.5, ... to 3-second time windows since the arrival time picked by the STA/LTA algorithm Figure~\ref{sta_lta}. For each time window, we compute the \textbf{maximum, the relative time within a window for the maximum, mean, variance, skewness, kurtosis, percentile (0.25, 0.5, 0.75), and norm (L1, L2, L4), $\tau_c$ and $\tau_p^{max}$}. The \textbf{distance} from the earthquake hypocenter to the station ($r$) is also included. There are \textbf{1663 features} generated for each sample. We note there may be many redundant features, especially for amplitude information. It is possible that the performance could be improved if we incorporate more frequency-related features. But currently we use only $\tau_c$ and $\tau_p^{max}$. For random forest, the amplitude-related features are corrected by the earthquake-station distance. Most of these features are transformed into the logarithmic scale, except skewness and kurtosis.
+
+\subsubsection{Prediction Performance}
+We use \textbf{leave-one-out cross validation} for ridge, \textbf{10-fold cross validation} for lasso and elastic net to tune the hyperparameters, while \textbf{out-of-bag scores} are used for random forest. Then the best models, from cross validate stage,  are used to predict the earthquake magnitudes in the test set.
+
+The evaluation metrics for the regressors are shown in Table~\ref{tab1}. All the machine learning methods \textbf{outperform the baseline}, with random forest being slight better than the linear models. This may suggest a weak non-linear relation between the features and the magnitudes. As expected, the lasso regression and elastic-net regression produce the most sparse models, with only 347 and 349 features with non-zero coefficients (linear models) or importance (random forest).   
 
 \begin{table}[htbp]
 	\small
@@ -164,9 +167,7 @@ The evaluation metrics for the regressors are shown in Table~\ref{tab1}. All the
 	\label{tab1}
 \end{table}
 
-Figure~\ref{prediction_vs_true} shows the predicted magnitudes and error compared to the true magnitudes. As mentioned in Section 5.1, the baseline model systematically underestimates the magnitudes of large earthquakes. For lasso and random forest models, this effect is less severe. However, it seems that even using the latter two models, we still underestimate the magnitudes of the large earthquakes ($geq$ M4.5), as shown by the mean error (Table~\ref{tab1}). The MSE for the small earthquakes is several times less than that of the large earthquakes. At least one of the reasons is that the number of samples within this magnitude range is too small. Another reason could be that there are not many features which are not sensitive to the finite fault effect for large earthquakes, such as reliable frequency-related features.      
-
-
+Figure~\ref{prediction_vs_true} shows the predicted magnitudes and error compared to the true magnitudes. As mentioned in Section 5.1, the baseline model systematically \textbf{underestimates} the magnitudes of large earthquakes. For lasso and random forest models, \textbf{this effect is less severe}. However, it seems that even using the latter two models, we still underestimate the magnitudes of the large earthquakes ($geq$ M4.5), as shown by the mean error (Table~\ref{tab1}). The MSE for the small earthquakes is several times less than that of the large earthquakes. At least one of the reasons is that the number of samples within this magnitude range is too small. Another reason could be that there are not many features which are not sensitive to the finite fault effect for large earthquakes, such as reliable frequency-related features.
 
 
 \begin{figure}[ht!]
@@ -177,21 +178,17 @@ Figure~\ref{prediction_vs_true} shows the predicted magnitudes and error compare
 \end{figure}
 
 
-
-
 \subsubsection{Important features}
 Figure~\ref{Feature_importance_lasso_RF} shows the most important features for lasso and random forest. It is expected that distance would be very important for lasso but not for random forest because the amplitude-related features for the former are not corrected for geometrical spreading (distance). It seems that all but one for random forest are derived from the vertical component of the displacement time series (labeled as BHZ.disp), while features for lasso show a greater variety. This seems consistent with that the signal-to-noise ratio for P wave is generally higher for the vertical component, but there could be some non-linearity that may not be fully explained by a linear model such as lasso. In addition, frequency-related features are more important for lasso (e.g. $\tau_c$).  
 
 
-
-
 \section{Neural Networks and LSTM}
-Neural networks are famous for its function of "automatic feature extraction". So for the input layer, instead of using empirical features, we tried used several "raw" measurements, including the time series of displacement, velocity, acceleration and cumulative acceleration of the ground motion. As we have mentioned in the linear models, we cropped 3 seconds window starting from the onset, which give us total 60 data points, given the sampling rate of instrument is 20Hz on one component. Since in total we have three components data, plus the distance information, the input layer size is $3*60 + 1 = 181$. 
+Neural networks are famous for its function of "automatic feature extraction". For the input layer, instead of using empirical features, we tried used "raw" measurements, such as the time series of displacement, velocity, acceleration and cumulative acceleration of the ground motion\cite{Bose2009}. As we have mentioned in the linear models, we cropped 3 seconds window starting from the onset, which give us total 60 data points, given the sampling rate of instrument is 20Hz on one component. Combining three components, plus the distance information, the \textbf{size of input layer} is $3*60 + 1 = 181$. 
 
-Again, considering the symmetrical feature of input, i.e., given the sign reverted ground motion, it ends up with same magnitude of earthquakes, we did one more step, using the envelope transition, rather than the raw waveform, as the features of input layer. To avoid over-fitting, we include the $\l2$ regularization and a dropout layer.
+Again, considering the symmetrical feature of input, i.e., given the sign reverted ground motion, it should end up with same magnitude of earthquakes, we did one extra step, using the envelope, rather than the raw time series, as the features of input layer. To avoid over-fitting, we include the \textbf{$\l2$ regularization} and \textbf{dropout layers} in between.
 
 \subsection{Hyper-parameter tuning using validation dataset}
-The \textbf{hyper-parameter} in Neural networks includes the \textbf{number of hidden layers}, the \textbf{number of neurons in each hidden layers}, the learning rate, weight decay($l2$ regularization coefficient), dropout ratio, the activation function and so on. Due to the high cost of training a neural network, here we only focusd on tunning two parameters, the number of hidden layers and the number of neurons in each hidden layers, which affect the representation capability of neural networks the most. For the layout of neural networks, we keep the number of neurons the same in each hidden layer.
+The \textbf{hyper-parameter} in Neural networks includes the \textbf{number of hidden layers}, the \textbf{number of neurons in each hidden layers}, the learning rate, weight decay($l2$ regularization coefficient), dropout ratio, the activation function and so on. Due to the high cost of training a neural network, here we only focused on tuning two parameters, the number of hidden layers and the number of neurons in each hidden layers, which affect the representation capability of neural networks the most. For the layout of neural networks, we keep the number of neurons the same in each hidden layer.
 
 For the choice of activation function, we tried using ReLU and Tanh. It turns out that the \textbf{ReLU} gives much better performance, from the point view of convergence rate and final loss values. As for other parameters, we set the weight decay to 0.005, the drop ratio to 10\%.
 
@@ -218,10 +215,10 @@ For the choice of activation function, we tried using ReLU and Tanh. It turns ou
 	\label{tab:nn_cv}
 \end{table}
 
-In order to tune the hyper-paramters, we split the train data one step more, keeping 80\% as train data and 20\% as validation data. Table\ref{tab:nn_cv} shows our validation results, using the displacement as the input feature. From the table, we can see that there is really no clear patterns as to set the number of layers and neurons, indicating the complexity and non-linearity of neuron networks. One observation, though, coming from the table, is that setting the number of neurons in each hidden layer to 300, might there is no optimal models coming from that setting. Since our input layer is in dimension of 181, 300 might leads to over-fitting our model.  On the other hand, setting the number of neurons to 10 is might also leads to under-fit.
+In order to tune the hyper-parameters, we split the train data one step more, keeping \textbf{80\% as train data} and \textbf{20\% as validation data}. Table\ref{tab:nn_cv} shows our validation results, all using the displacement as the input feature. From the table, we can see that there is really no clear patterns as to set the number of layers and neurons, indicating the complexity and non-linearity of neuron networks. One observation, though, coming from the table, is that setting the number of neurons in each hidden layer to 300 might not be a good choice, since there is no optimal models coming from that column. Since our input layer is in dimension of 181, 300 might leads to over-fitting our model(or low convergence rate). On the contrary, setting the number of neurons to 10 is might also leads to under-fit.
 
 \subsection{Long Short-Term Memory(LSTM)}
-We also tried LSTM here since our input feature is basically time series. However, the MSE of validation and test data, stays around 0.180 and won't reduce any more. We got one model, using the acceleration as input time series, reaches the MSE value as 0.140. However, the MSE value is still way beyond our baseline mode. One difficulty we found in LSTM is there a very important feature, distance, very difficulty to incorporate into the LSTM framework since it doesn't have any temporal relationship with the time series. Unlike the task of speech recognition, in which the shape of waveform is important but the absolute amplitude is not, distance will play a vital role in prediction the magnitude since the amplitude of  waveform will decay in exponential order with distance.
+We also tried LSTM here since our input feature is basically time series and the data points has temporal dependencies between each other. However, the MSE of validation and test data for most model settings, stays around 0.180 and won't reduce any more. We got one model(the best LSTM model), using the acceleration as input time series, reaches the MSE value as 0.140. However, the MSE value is still way beyond our baseline mode. One difficulty we found in LSTM is there is a very important feature, \textbf{distance}, \textbf{being difficult to incorporate into the LSTM framework} since it doesn't have any temporal relationship with the time series. Unlike the task of speech recognition, in which case the shape of waveform is important but the absolute amplitude is not, \textbf{distance plays a vital role} in prediction the magnitude since the amplitude of waveform will decay in exponential order with distance.
 
 
 \subsection{Performance Summary}
@@ -247,7 +244,9 @@ We also tried LSTM here since our input feature is basically time series. Howeve
 	\label{tab:nn_perf}
 \end{table}
 
-From table\ref{tab:nn_perf}, we can see that the overall performance of Neural networks beats the baseline model but still not as good as linear models or random forest. What is more, the under-estimation of large events, which is measured by the mean error in the table, is also reduced compared to linear models, though the difference is not significant. The LSTM model doesn't achieve very good results in our current settings. Originally, we thought LSTM is the best method when dealing with time series data. However, due to special settings of our problem, that we need to incorporate distance information, it turns out it needs more tunnings in the future.
+From table\ref{tab:nn_perf}, we can see that the overall performance of Neural networks beats the baseline model but still not as good as linear models or random forest. What is more, the under-estimation of large events, which is measured by the mean error in the table, is also reduced compared to linear models, though the difference is not significant. The LSTM model doesn't achieve very good results in our current settings. Originally, we thought LSTM is the best method when dealing with time series data. However, due to special settings of our problem, that we need to incorporate distance information, it turns out we needs more efforts to improve the LSTM in the future work.
+
+One interesting observation from figure\ref{fig:nn_right} is that there seems to be some clipping effects in predicting low magnitude earthquakes. The prediction won't go lower than 3.0 however in our training dataset there is earthquakes from magnitude 2.8. We suspect that due to small magnitude earthquakes triggers very small ground motion, the neurons may not be activated with such small inputs.
 
 In summary, the Neural network beats the baseline model and out-performs linear model in some aspects but it is still not good as Random Forest.  The LSTM needs more work in the future.
 
@@ -256,24 +255,24 @@ In summary, the Neural network beats the baseline model and out-performs linear 
 \begin{subfigure}{0.48\textwidth}
 \centering
 \includegraphics[width = \textwidth]{./figure/nn_loss}
-\caption{variance explained by singular values}
-\label{fig:svd_left}
+\caption{Loss change with epoch of training}
+\label{fig:nn_left}
 \end{subfigure}
 \begin{subfigure}{0.48\textwidth}
 \centering
 \includegraphics[width = \textwidth]{./figure/nn_prediction}
-\caption{The voilin plot of probabilities}
-\label{fig:svd_right}
+\caption{The true magnitudes versus predictions}
+\label{fig:nn_right}
 \end{subfigure}
-\caption{Training and prediction results from Neural Network. The figure on the left shows change of loss(mean squared error) with epoch in the training procedure, with different features as the first input layer. The figure on the right shows the prediction magnitudes versus the true magnitudes.}
-\label{fig:combined}
+\caption{Training and prediction results from Neural Network. The figure on the left shows change of loss(mean squared error) with epoch in the training procedure, with different features as the first input layer. We can see in the first few epochs, the loss reduced very fast but after 15 epochs, the speeds slow down and the loss stay at the same level afterwards. The figure on the right shows the prediction magnitudes versus the true magnitudes.}
+\label{fig:nn}
 \end{figure}
 
 \section{Discussions and Conclusions}
 
-In this work, we implemented various methods to predict the magnitude of earthquakes using the very early arrivals of ground motion. Starting from a single-factor model as the baseline, we tried linear models, random forest, all the way to neural networks and LSTM. Among the models, most of them beat the baseline model and random forest stand out as the best one, reducing the MSE from 0.090 to 0.045 comparing with the baseline model. Another question we want to address is to find if there is self-similarity across earthquakes with a wide range of magnitudes. The answer, from our results, is probably NO. The MSE values and mean errors of large earthquakes($\geq $ M4.5) is significantly larger than smaller ones($< $ M4.5), which means it is not straight extropolation from smalle to large events.
+In this work, we implemented various methods to predict the magnitude of earthquakes using the very early arrivals of ground motion. Starting from a single-factor model as the baseline, we tried linear models, random forest, all the way to neural networks and LSTM. Among the models, most of them beat the baseline model and random forest stand out as the best one, reducing the MSE from 0.090 to 0.045 comparing with the baseline model. Another question we want to address is to find if there is self-similarity across earthquakes with a wide range of magnitudes. The answer, from our results, is probably NO. The MSE values and mean errors of large earthquakes($\geq $ M4.5) is significantly larger than smaller ones($< $ M4.5), which means it is not straight extrapolation from small to large events.
 
-Our future works will primarily be focused on the Neural network and LSTM. As shown in the previous sections, the Neural netwoks beats the baseline model but still worse than random forest. We will try to put more features in the input layers and have more tunning in the future work. On the other hand, we did not succeed using LSTM even though the method is proven to be very powerful in time series related problems. Due to the special physical background in our problem, distance plays a vital role in predicting the earthquake magnitude but we are not sure how to assimilate the feature into LSTM. Our future would be more experiment and research, designing a special LSTM that takes in non-temporal features.
+Our future works will primarily be focused on the Neural network and LSTM. As shown in the previous sections, the Neural netwoks beats the baseline model but still worse than random forest. We will try to put more features in the input layers and have more tuning in the future work. On the other hand, we did not succeed using LSTM even though the method is proven to be very powerful in time series related problems. Due to the special physical background in our problem, distance plays a vital role in predicting the earthquake magnitude but we are not sure how to assimilate the feature into LSTM. Our future would be more experiment and research, designing a special LSTM that takes in non-temporal features.
 
 %\section{Scientific Questions}
 %Although the primary goal of this proposal is to reduce the error in fast, real-time report of earthquake magnitudes, we hope that the results could also shed light on several important scientific questions that are yet to be resolved in seismology. These include: (1) Is there enough information in the first a few seconds of the seismograms to predict the final magnitude of an earthquake? If yes, what is it? The answer to this would be very important for decreasing the size of ``blind zone" during an earthquake (the region that the strong shaking arrives before the warning is issued); (2) Is there self-similarity across earthquakes with a wide range of magnitudes? Small earthquakes (less than M5) occur much more frequently than large earthquakes; the former dominates our dataset. Can we use small earthquakes to infer the properties of large earthquakes? (3) Is it possible to reduce the number of false positives in our system, which trigger alarm without real earthquake happening and cause unnecessary panic? To address these questions would have not only substantial societal impact, but also significant implications for understanding earthquake dynamics.    
